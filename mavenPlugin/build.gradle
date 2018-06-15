@@ -1,0 +1,31 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    //gradle sdk
+    compile gradleApi()
+    //groovy sdk
+    compile localGroovy()
+}
+repositories {
+    mavenCentral()
+}
+
+
+
+//仓库下 插件目录及版本号（根据这两个找到插件位置）
+group='com.openxu.plugin'
+version='1.0.0'
+
+uploadArchives {   //发布插件 的 task
+    repositories {
+        mavenDeployer {
+            //提交到远程服务器：
+            // repository(url: "http://www.xxx.com/repos") {
+            //    authentication(userName: "admin", password: "admin")
+            // }
+            //指定本地Maven仓库地址:当前模块目录下repos目录中
+            repository(url: uri('/repos'))
+        }
+    }
+}

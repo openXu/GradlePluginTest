@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/BuildSrc/BuildSrc.iml" filepath="$PROJECT_DIR$/BuildSrc/BuildSrc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GradlePluginTest.iml" filepath="$PROJECT_DIR$/GradlePluginTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mavenPlugin/mavenPlugin.iml" filepath="$PROJECT_DIR$/mavenPlugin/mavenPlugin.iml" />
+      <module fileurl="file://E:\openXu\GradlePluginTest\mavenPlugin\plugin.iml" filepath="E:\openXu\GradlePluginTest\mavenPlugin\plugin.iml" />
+    </modules>
+  </component>
+</project>
