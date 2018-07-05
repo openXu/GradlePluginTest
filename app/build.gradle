@@ -1,3 +1,5 @@
+import android.util.Property
+
 apply plugin: 'com.android.application'
 //apply plugin: 'com.openxu.localplugin.LocalPlugin'
 
@@ -9,8 +11,13 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -24,27 +31,156 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
 }
 
-class ApkDistPlugin implements Plugin<Project> {
 
-    @Override
+/**1.1 一个简单的插件*/
+/*class GreetingPlugin implements Plugin<Project> {
     void apply(Project project) {
-        project.task('apkdist') << {
-            println 'hello, world!'
+        project.task('hello') {
+            doLast {
+                println 'Hello from the GreetingPlugin'
+            }
+        }
+    }
+}*/
+
+/**1.2 为项目添加一个简单的扩展对象*/
+/*
+class GreetingPluginExtension {
+    String message = 'Hello from GreetingPlugin'
+}
+class GreetingPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        // Add the 'greeting' extension object
+        def extension = project.extensions.create('greeting', GreetingPluginExtension)
+        // Add a task that uses configuration from the extension object
+        project.task('hello') {
+            doLast {
+                println extension.message
+            }
+        }
+    }
+}
+// Configure the extension
+greeting.message = 'Hi from Gradle'
+*/
+
+/**1.3 有多个属性的扩展对象*/
+/*class GreetingPluginExtension {
+    String message
+    String greeter
+}
+
+class GreetingPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def extension = project.extensions.create('greeting', GreetingPluginExtension)
+        project.task('hello') {
+            doLast {
+                println project['greeting'].greeter
+                println "${extension.message} from ${extension.greeter}"
+            }
+        }
+    }
+}
+apply plugin: GreetingPlugin
+// Configure the extension using a DSL block
+greeting {
+    message = 'Hi'
+    greeter = 'Gradle'
+}*/
+
+//gradlew -q hello
+
+/**2 在定义插件任务中处理文件*/
+/*定义一个task（需要继承DefaultTask）*/
+/*
+class GreetingToFileTask extends DefaultTask {
+    def destination
+    File getDestination() {
+        project.file(destination)
+    }
+    @TaskAction
+    def greet() {
+        def file = getDestination()
+        file.parentFile.mkdirs()
+        file.write 'Hello   sdsd!'
+    }
+}
+task greetTask(type: GreetingToFileTask) {
+    destination = { project.greetingFile }
+}
+
+task sayGreeting(dependsOn: greetTask) {
+    doLast {
+        println file(greetingFile).text
+    }
+}
+//文件路径为build目录下的hello.txt文件
+ext.greetingFile = "$buildDir/hello.txt"
+//gradlew -q sayGreeting
+*/
+
+/**将扩展属性映射到任务属性的类型*/
+class GreetingPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def extension = project.extensions.create('greeting', GreetingPluginExtension, project)
+        project.tasks.create('hello', Greeting) {
+            message = extension.message
+            outputFiles = extension.outputFiles
         }
     }
 }
 
-apply plugin: ApkDistPlugin
+class GreetingPluginExtension {
+    final Property<String> message
+    final ConfigurableFileCollection outputFiles
+
+    GreetingPluginExtension(Project project) {
+        message = project.objects.property(String)
+        message.set('Hello from GreetingPlugin')
+        outputFiles = project.layout.configurableFiles()
+    }
+
+    void setOutputFiles(FileCollection outputFiles) {
+        this.outputFiles.setFrom(outputFiles)
+    }
+}
+
+class Greeting extends DefaultTask {
+    final Property<String> message = project.objects.property(String)
+    final ConfigurableFileCollection outputFiles = project.layout.configurableFiles()
+
+    void setOutputFiles(FileCollection outputFiles) {
+        this.outputFiles.setFrom(outputFiles)
+    }
+    
+    @TaskAction
+    void printMessage() {
+        outputFiles.each {
+            logger.quiet "Writing message 'Hi from Gradle' to file"
+            it.text = message.get()
+        }
+    }
+}
+
+apply plugin: GreetingPlugin
+
+greeting {
+    message = 'Hi from Gradle'
+    outputFiles = layout.files('a.txt', 'b.txt')
+}
+
+//gradlew -q hello
+
 
 //使用gradlew -q hello执行
-apply plugin: 'groovy'
+/*apply plugin: 'groovy'
 task hello {
     doLast {
         println '********************build script*********************'
         println 'Hello world!'
         println '********************build script*********************'
     }
-}
+}*/
 
 //使用本地模块插件
 apply plugin: com.openxu.localplugin.LocalPlugin
